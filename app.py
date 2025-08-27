@@ -69,16 +69,3 @@ if st.button("Prediksi"):
         ax.text(i, v + 0.02, f"{v:.2%}", ha="center", fontsize=10)
     st.pyplot(fig)
 
-    # === Tambah grafik Feature Importance ===
-    st.subheader("Faktor Paling Berpengaruh (Feature Importance)")
-    importances = model.feature_importances_
-    feat_imp_df = pd.DataFrame({
-        "Fitur": selected_features,
-        "Importance": importances
-    }).sort_values(by="Importance", ascending=True)  # ascending supaya barh plot rapi
-
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.barh(feat_imp_df["Fitur"], feat_imp_df["Importance"], color="teal")
-    ax.set_xlabel("Tingkat Kepentingan")
-    ax.set_title("Feature Importance Random Forest")
-    st.pyplot(fig)
