@@ -16,8 +16,12 @@ st.write("Masukkan data berikut untuk prediksi:")
 # === Form input untuk user ===
 user_input = {}
 for feature in selected_features:
-    # step=0.01 agar bisa ketik manual angka desimal, format="%.2f" untuk valid input
-    user_input[feature] = st.number_input(f"{feature}", value=0.0, step=0.01, format="%.2f")
+    val = st.text_input(f"{feature}", "0")
+    try:
+        user_input[feature] = float(val)
+    except ValueError:
+        st.error(f"Input {feature} harus berupa angka!")
+        user_input[feature] = 0.0
 
 # === Konversi ke DataFrame sesuai urutan fitur ===
 input_df = pd.DataFrame([user_input], columns=selected_features)
