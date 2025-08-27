@@ -18,6 +18,8 @@ user_input = {}
 for feature in selected_features:
     val = st.text_input(f"{feature}", "0")
     try:
+        # Ganti koma dengan titik biar bisa input 0,88 atau 0.88
+        val = val.replace(",", ".")
         user_input[feature] = float(val)
     except ValueError:
         st.error(f"Input {feature} harus berupa angka!")
@@ -32,9 +34,30 @@ if st.button("Prediksi"):
     probabilities = model.predict_proba(input_df)[0]  # [prob_tidak_PCOS, prob_PCOS]
 
     if prediction == 1:
-        st.success(f"💡 Hasil Prediksi: **PCOS** dengan probabilitas {probabilities[1]:.2%}")
+        st.warning(f"⚠️ Hasil Prediksi: **PCOS** dengan probabilitas {probabilities[1]:.2%}")
+
+        # === Rule-based Expert System (PCOS) ===
+        st.write(
+            """
+            🧾 **Rekomendasi Sistem (Rule-based Expert System):**  
+            Sistem ini menyarankan Anda untuk melakukan **konsultasi lebih lanjut ke dokter spesialis kandungan** untuk pemeriksaan lanjutan.  
+
+            ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
+            """
+        )
+
     else:
-        st.info(f"💡 Hasil Prediksi: **Tidak PCOS** dengan probabilitas {probabilities[0]:.2%}")
+        st.success(f"💡 Hasil Prediksi: **Tidak PCOS** dengan probabilitas {probabilities[0]:.2%}")
+
+        # === Rule-based Expert System (Tidak PCOS) ===
+        st.write(
+            """
+            🧾 **Rekomendasi Sistem (Rule-based Expert System):**  
+            Tetap jaga pola hidup sehat, lakukan pemeriksaan rutin, dan segera konsultasi ke dokter apabila muncul keluhan lain.  
+
+            ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
+            """
+        )
 
     # === Tambah grafik probabilitas ===
     st.subheader("Visualisasi Probabilitas")
@@ -44,4 +67,18 @@ if st.button("Prediksi"):
     ax.set_ylim(0, 1)
     for i, v in enumerate(probabilities):
         ax.text(i, v + 0.02, f"{v:.2%}", ha="center", fontsize=10)
+    st.pyplot(fig)
+
+    # === Tambah grafik Feature Importance ===
+    st.subheader("Faktor Paling Berpengaruh (Feature Importance)")
+    importances = model.feature_importances_
+    feat_imp_df = pd.DataFrame({
+        "Fitur": selected_features,
+        "Importance": importances
+    }).sort_values(by="Importance", ascending=True)  # ascending supaya barh plot rapi
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.barh(feat_imp_df["Fitur"], feat_imp_df["Importance"], color="teal")
+    ax.set_xlabel("Tingkat Kepentingan")
+    ax.set_title("Feature Importance Random Forest")
     st.pyplot(fig)
