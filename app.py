@@ -15,12 +15,12 @@ st.write("Masukkan data berikut untuk prediksi:")
 
 # === Mapping deskripsi dan contoh rentang input ===
 feature_info = {
-    "Follicle No. (R)": {"desc": "Masukkan jumlah folikel di ovarium kanan", "range": "Contoh: 1 - 10"},
-    "Follicle No. (L)": {"desc": "Masukkan jumlah folikel di ovarium kiri", "range": "Contoh: 1 - 10"},
+    "Follicle No. (R)": {"desc": "Masukkan jumlah folikel di ovarium kanan", "range": "Contoh: 0 - 25"},
+    "Follicle No. (L)": {"desc": "Masukkan jumlah folikel di ovarium kiri", "range": "Contoh: 0 - 25"},
     "Skin darkening (Y/N)": {"desc": "Apakah terdapat penggelapan kulit", "range": "Pilih: Tidak (0) / Ya (1)"},
     "Weight gain(Y/N)": {"desc": "Apakah terjadi peningkatan berat badan", "range": "Pilih: Tidak (0) / Ya (1)"},
     "hair growth(Y/N)": {"desc": "Apakah terjadi pertumbuhan rambut berlebih", "range": "Pilih: Tidak (0) / Ya (1)"},
-    "Cycle(R/I)": {"desc": "Tipe siklus menstruasi", "range": "Contoh: Regular(Teratur) = 0 / Irregular(Tidak Teratur) = 1"},
+    "Cycle(R/I)": {"desc": "Tipe siklus menstruasi", "range": "Pilih: Regular(Teratur) = 0 / Irregular(Tidak Teratur) = 1"},
     "AMH(ng/mL)": {"desc": "Masukkan nilai Anti-Müllerian Hormone", "range": "Contoh: 1 - 10"},
     "Cycle length(days)": {"desc": "Masukkan panjang siklus menstruasi dalam hari", "range": "Contoh: 21 - 35"},
     "FSH(mIU/mL)": {"desc": "Masukkan nilai Follicle-Stimulating Hormone", "range": "Contoh: 3 - 15"},
@@ -88,4 +88,5 @@ if st.button("Prediksi"):
     for i, v in enumerate(probabilities):
         ax.text(i, v + 0.02, f"{v:.2%}", ha="center", fontsize=10)
     st.pyplot(fig)
+
 
