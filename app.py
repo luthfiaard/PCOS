@@ -60,7 +60,11 @@ feature_info = {
 # === Form input untuk user ===
 user_input = {}
 for feature in selected_features:
-    val = st.text_input(f"{feature}", "")
+    # Tampilkan deskripsi di atas input box
+    if feature in feature_info:
+        st.markdown(f"**{feature}**  \nℹ️ {feature_info[feature]['desc']} — {feature_info[feature]['range']}")
+
+    val = st.text_input("", "")
     try:
         # Ganti koma dengan titik biar bisa input 0,88 atau 0.88
         val = val.replace(",", ".")
@@ -68,10 +72,6 @@ for feature in selected_features:
     except ValueError:
         st.error(f"Input {feature} harus berupa angka!")
         user_input[feature] = 0.0
-
-    # Tampilkan deskripsi & contoh di bawah input
-    if feature in feature_info:
-        st.caption(f"ℹ️ {feature_info[feature]['desc']} — {feature_info[feature]['range']}")
 
 # === Konversi ke DataFrame sesuai urutan fitur ===
 input_df = pd.DataFrame([user_input], columns=selected_features)
