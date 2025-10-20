@@ -103,7 +103,7 @@ if pred_btn:
     st.markdown("---")
     if prediction == 1:
         st.markdown(
-            f"<h2 style='text-align: center; color: #b30000;'>⚠️ Hasil Prediksi: PCOS</h2>"
+            f"<h2 style='text-align: center; color: #FF4500;'>⚠️ Hasil Prediksi: PCOS</h2>"
             f"<h3 style='text-align: center;'>Probabilitas: {probabilities[1]:.2%}</h3>",
             unsafe_allow_html=True
         )
@@ -113,7 +113,7 @@ if pred_btn:
         )
     else:
         st.markdown(
-            f"<h2 style='text-align: center; color: #006600;'>💡 Hasil Prediksi: Tidak PCOS</h2>"
+            f"<h2 style='text-align: center; color: #ADFF2F;'>💡 Hasil Prediksi: Tidak PCOS</h2>"
             f"<h3 style='text-align: center;'>Probabilitas: {probabilities[0]:.2%}</h3>",
             unsafe_allow_html=True
         )
@@ -151,3 +151,4 @@ if history_btn:
         st.dataframe(hist_df, use_container_width=True)
     else:
         st.info("Belum ada riwayat prediksi yang tersimpan.")
+
