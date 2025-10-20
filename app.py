@@ -22,7 +22,7 @@ feature_info = {
     "Follicle No. (L)": {"desc": "Masukkan jumlah folikel di ovarium kiri", "range": "Contoh: 0 - 25"},
     "Skin darkening (Y/N)": {"desc": "Apakah terdapat penggelapan kulit", "range": "Pilih: Tidak (0) / Ya (1)"},
     "Weight gain(Y/N)": {"desc": "Apakah terjadi peningkatan berat badan", "range": "Pilih: Tidak (0) / Ya (1)"},
-    "hair growth(Y/N)": {"desc": "Apakah terjadi pertumbuhan rambut berlebih", "range": "Pilih: Tidak (0) / Ya (1)"},
+    "Hair growth(Y/N)": {"desc": "Apakah terjadi pertumbuhan rambut berlebih", "range": "Pilih: Tidak (0) / Ya (1)"},
     "Cycle(R/I)": {"desc": "Tipe siklus menstruasi", "range": "Pilih: Regular (0) / Irregular (1)"},
     "AMH(ng/mL)": {"desc": "Masukkan nilai Anti-Müllerian Hormone", "range": "Contoh: 1 - 10"},
     "Cycle length(days)": {"desc": "Masukkan panjang siklus menstruasi dalam hari", "range": "Contoh: 21 - 35"},
@@ -108,7 +108,7 @@ if pred_btn:
         st.success(f"💡 Hasil Prediksi: **Tidak PCOS** dengan probabilitas {probabilities[0]:.2%}")
         rekomendasi = (
             "Tetap jaga pola hidup sehat dan lakukan pemeriksaan rutin. "
-            "Segera konsultasi ke dokter bila muncul keluhan lain."
+            "Segera konsultasi ke dokter apabila muncul keluhan lain."
         )
 
     st.info(f"🧾 **Rekomendasi Sistem:** {rekomendasi}")
@@ -140,3 +140,4 @@ if history_btn:
         st.dataframe(hist_df, use_container_width=True)
     else:
         st.info("Belum ada riwayat prediksi yang tersimpan.")
+
