@@ -9,9 +9,10 @@ bundle = joblib.load("final_model_with_features.sav")
 model = bundle["model"]
 selected_features = bundle["features"]
 
-st.title("Prediksi PCOS dengan Random Forest")
+st.title("Prediksi Penyakit PCOS dengan Random Forest")
 
-st.write("Masukkan data berikut untuk prediksi:")
+st.write("Masukkan data berikut untuk prediksi:"
+        "Jangan gunakan tanda koma(,) ganti dengan tanda titik (.)")
 
 # === Mapping deskripsi dan contoh rentang input ===
 feature_info = {
@@ -25,6 +26,20 @@ feature_info = {
     "Cycle length(days)": {"desc": "Masukkan panjang siklus menstruasi dalam hari", "range": "Contoh: 21 - 35"},
     "FSH(mIU/mL)": {"desc": "Masukkan nilai Follicle-Stimulating Hormone", "range": "Contoh: 3 - 15"},
     "LH(mIU/mL)": {"desc": "Masukkan nilai Luteinizing Hormone", "range": "Contoh: 2 - 20"}
+}
+
+# === Mapping satuan untuk tampilan hasil ===
+feature_units = {
+    "Follicle No. (R)": "folikel",
+    "Follicle No. (L)": "folikel",
+    "Skin darkening (Y/N)": "(0=Tidak, 1=Ya)",
+    "Weight gain(Y/N)": "(0=Tidak, 1=Ya)",
+    "hair growth(Y/N)": "(0=Tidak, 1=Ya)",
+    "Cycle(R/I)": "(0=Regular, 1=Irregular)",
+    "AMH(ng/mL)": "ng/mL",
+    "Cycle length(days)": "hari",
+    "FSH(mIU/mL)": "mIU/mL",
+    "LH(mIU/mL)": "mIU/mL"
 }
 
 # === Form input untuk user ===
@@ -64,19 +79,14 @@ if st.button("Prediksi"):
     else:
         st.success(f"💡 Hasil Prediksi: **Tidak PCOS** dengan probabilitas {probabilities[0]:.2%}")
 
-    # === Tampilkan Data yang Diuji (Per Baris) ===
+    # === Data yang Diuji (dengan satuan) ===
     st.subheader("Data yang Diuji")
     for feature, value in user_input.items():
-        st.write(f"- {feature}: **{value}**")
-
-    # === Informasi Model ===
-    st.subheader("Informasi Model")
-    st.markdown("""
-    - Algoritma: **Random Forest**
-    - Oversampling: **SMOTE**
-    - Akurasi pada data uji: **91.74%**
-    - F1-Score: **0.89**
-    """)
+        satuan = feature_units.get(feature, "")
+        if satuan:
+            st.write(f"- {feature}: **{value} {satuan}**")
+        else:
+            st.write(f"- {feature}: **{value}**")
 
     # === Rekomendasi Sistem ===
     st.subheader("Rekomendasi Sistem (Rule-based Expert System)")
