@@ -8,30 +8,33 @@ bundle = joblib.load("final_model_with_features.sav")
 model = bundle["model"]
 selected_features = bundle["features"]
 
+# === Judul dan instruksi ===
 st.title("🧬 Prediksi PCOS dengan Random Forest")
 st.write("Masukkan data berikut untuk melakukan prediksi:")
-st.write("Jangan gunakan tanda koma (,) ganti dengan tanda titik (.)")
+st.caption("⚠️ Jangan gunakan tanda koma (,) — gunakan tanda titik (.) untuk angka desimal.")
 
-# === Inisialisasi session state untuk riwayat prediksi ===
+# === Inisialisasi session state untuk riwayat ===
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# === Mapping deskripsi dan contoh rentang input ===
+# === Mapping deskripsi & contoh input ===
 feature_info = {
-    "Follicle No. (R)": {"desc": "Masukkan jumlah folikel di ovarium kanan", "range": "Contoh: 0 - 25"},
-    "Follicle No. (L)": {"desc": "Masukkan jumlah folikel di ovarium kiri", "range": "Contoh: 0 - 25"},
+    "Follicle No. (R)": {"desc": "Jumlah folikel di ovarium kanan", "range": "Contoh: 0 - 25"},
+    "Follicle No. (L)": {"desc": "Jumlah folikel di ovarium kiri", "range": "Contoh: 0 - 25"},
     "Skin darkening (Y/N)": {"desc": "Apakah terdapat penggelapan kulit", "range": "Pilih: Tidak (0) / Ya (1)"},
     "Weight gain(Y/N)": {"desc": "Apakah terjadi peningkatan berat badan", "range": "Pilih: Tidak (0) / Ya (1)"},
-    "Hair growth(Y/N)": {"desc": "Apakah terjadi pertumbuhan rambut berlebih", "range": "Pilih: Tidak (0) / Ya (1)"},
+    "hair growth(Y/N)": {"desc": "Apakah terjadi pertumbuhan rambut berlebih", "range": "Pilih: Tidak (0) / Ya (1)"},
     "Cycle(R/I)": {"desc": "Tipe siklus menstruasi", "range": "Pilih: Regular (0) / Irregular (1)"},
-    "AMH(ng/mL)": {"desc": "Masukkan nilai Anti-Müllerian Hormone", "range": "Contoh: 1 - 10"},
-    "Cycle length(days)": {"desc": "Masukkan panjang siklus menstruasi dalam hari", "range": "Contoh: 21 - 35"},
-    "FSH(mIU/mL)": {"desc": "Masukkan nilai Follicle-Stimulating Hormone", "range": "Contoh: 3 - 15"},
-    "LH(mIU/mL)": {"desc": "Masukkan nilai Luteinizing Hormone", "range": "Contoh: 2 - 20"}
+    "AMH(ng/mL)": {"desc": "Nilai Anti-Müllerian Hormone", "range": "Contoh: 1 - 10"},
+    "Cycle length(days)": {"desc": "Panjang siklus menstruasi (hari)", "range": "Contoh: 21 - 35"},
+    "FSH(mIU/mL)": {"desc": "Nilai Follicle-Stimulating Hormone", "range": "Contoh: 3 - 15"},
+    "LH(mIU/mL)": {"desc": "Nilai Luteinizing Hormone", "range": "Contoh: 2 - 20"}
 }
 
-# === Form input untuk user ===
+# === Form input ===
 user_input = {}
+st.markdown("### 🧾 Form Input Data")
+
 for feature in selected_features:
     if feature in feature_info:
         st.markdown(f"**{feature}**  \nℹ️ {feature_info[feature]['desc']} — {feature_info[feature]['range']}")
@@ -56,9 +59,8 @@ for feature in selected_features:
 # === Konversi ke DataFrame ===
 input_df = pd.DataFrame([user_input], columns=selected_features)
 
-# === Tombol prediksi ===
+# === Tombol aksi ===
 col1, col2, col3 = st.columns([1, 1, 2])
-
 with col1:
     pred_btn = st.button("🔍 Prediksi")
 with col2:
@@ -66,7 +68,7 @@ with col2:
 with col3:
     history_btn = st.button("📊 Lihat Riwayat Prediksi (jika ada)")
 
-# === Fitur reset form ===
+# === Reset Form ===
 if reset_btn:
     for feature in selected_features:
         if feature in st.session_state:
@@ -78,8 +80,8 @@ if pred_btn:
     prediction = model.predict(input_df)[0]
     probabilities = model.predict_proba(input_df)[0]
 
+    # === Data yang diuji ===
     st.subheader("📋 Data yang Diuji")
-
     satuan_map = {
         "Follicle No. (R)": "folikel",
         "Follicle No. (L)": "folikel",
@@ -97,15 +99,24 @@ if pred_btn:
         else:
             st.write(f"**{feature}:** {value} {satuan_map.get(feature, '')}")
 
-    # === Hasil prediksi ===
+    # === Hasil prediksi (TAMPIL BESAR & TENGAH) ===
+    st.markdown("---")
     if prediction == 1:
-        st.warning(f"⚠️ Hasil Prediksi: **PCOS** dengan probabilitas {probabilities[1]:.2%}")
+        st.markdown(
+            f"<h2 style='text-align: center; color: #b30000;'>⚠️ Hasil Prediksi: PCOS</h2>"
+            f"<h3 style='text-align: center;'>Probabilitas: {probabilities[1]:.2%}</h3>",
+            unsafe_allow_html=True
+        )
         rekomendasi = (
             "Sistem menyarankan untuk melakukan **konsultasi ke dokter spesialis kandungan** "
             "untuk pemeriksaan lebih lanjut."
         )
     else:
-        st.success(f"💡 Hasil Prediksi: **Tidak PCOS** dengan probabilitas {probabilities[0]:.2%}")
+        st.markdown(
+            f"<h2 style='text-align: center; color: #006600;'>💡 Hasil Prediksi: Tidak PCOS</h2>"
+            f"<h3 style='text-align: center;'>Probabilitas: {probabilities[0]:.2%}</h3>",
+            unsafe_allow_html=True
+        )
         rekomendasi = (
             "Tetap jaga pola hidup sehat dan lakukan pemeriksaan rutin. "
             "Segera konsultasi ke dokter apabila muncul keluhan lain."
@@ -132,7 +143,7 @@ if pred_btn:
         ax.text(i, v + 0.02, f"{v:.2%}", ha="center", fontsize=10)
     st.pyplot(fig)
 
-# === Fitur lihat riwayat prediksi ===
+# === Tampilkan riwayat prediksi ===
 if history_btn:
     if len(st.session_state.history) > 0:
         st.subheader("📜 Riwayat Prediksi")
@@ -140,4 +151,3 @@ if history_btn:
         st.dataframe(hist_df, use_container_width=True)
     else:
         st.info("Belum ada riwayat prediksi yang tersimpan.")
-
