@@ -11,7 +11,7 @@ selected_features = bundle["features"]
 # === Judul dan instruksi ===
 st.title("🧬 Prediksi PCOS dengan Random Forest")
 st.write("Masukkan data berikut untuk melakukan prediksi:")
-st.caption("⚠️ Jangan gunakan tanda koma (,) — gunakan tanda titik (.) untuk angka desimal.")
+st.caption("⚠️ Jangan gunakan tanda koma (,) — gunakan tanda titik (.) untuk angka desimal. Bisa diisi lebih/kurang dari contoh range.")
 
 # === Inisialisasi session state untuk riwayat ===
 if "history" not in st.session_state:
@@ -24,7 +24,7 @@ feature_info = {
     "Skin darkening (Y/N)": {"desc": "Apakah terdapat penggelapan kulit", "range": "Pilih: Tidak (0) / Ya (1)"},
     "Weight gain(Y/N)": {"desc": "Apakah terjadi peningkatan berat badan", "range": "Pilih: Tidak (0) / Ya (1)"},
     "hair growth(Y/N)": {"desc": "Apakah terjadi pertumbuhan rambut berlebih", "range": "Pilih: Tidak (0) / Ya (1)"},
-    "Cycle(R/I)": {"desc": "Tipe siklus menstruasi", "range": "Pilih: Regular (0) / Irregular (1)"},
+    "Cycle(R/I)": {"desc": "Tipe siklus menstruasi", "range": "Pilih: Regular / Teratur (0) atau Irregular / Tidak Teratur (1)"},
     "AMH(ng/mL)": {"desc": "Nilai Anti-Müllerian Hormone", "range": "Contoh: 1 - 10"},
     "Cycle length(days)": {"desc": "Panjang siklus menstruasi (hari)", "range": "Contoh: 21 - 35"},
     "FSH(mIU/mL)": {"desc": "Nilai Follicle-Stimulating Hormone", "range": "Contoh: 3 - 15"},
@@ -151,4 +151,5 @@ if history_btn:
         st.dataframe(hist_df, use_container_width=True)
     else:
         st.info("Belum ada riwayat prediksi yang tersimpan.")
+
 
