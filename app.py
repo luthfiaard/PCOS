@@ -12,6 +12,10 @@ st.title("🧬 Prediksi PCOS dengan Random Forest")
 st.write("Masukkan data berikut untuk melakukan prediksi:")
 st.write("Jangan gunakan tanda koma (,) ganti dengan tanda titik (.)")
 
+# === Inisialisasi session state untuk riwayat prediksi ===
+if "history" not in st.session_state:
+    st.session_state.history = []
+
 # === Mapping deskripsi dan contoh rentang input ===
 feature_info = {
     "Follicle No. (R)": {"desc": "Masukkan jumlah folikel di ovarium kanan", "range": "Contoh: 0 - 25"},
@@ -33,15 +37,15 @@ for feature in selected_features:
         st.markdown(f"**{feature}**  \nℹ️ {feature_info[feature]['desc']} — {feature_info[feature]['range']}")
 
     if feature in ["Skin darkening (Y/N)", "Weight gain(Y/N)", "hair growth(Y/N)"]:
-        pilihan = st.selectbox(feature, ["Tidak (0)", "Ya (1)"], label_visibility="collapsed")
+        pilihan = st.selectbox(feature, ["Tidak (0)", "Ya (1)"], label_visibility="collapsed", key=feature)
         user_input[feature] = 1.0 if "Ya" in pilihan else 0.0
 
     elif feature == "Cycle(R/I)":
-        pilihan = st.selectbox(feature, ["Regular (0)", "Irregular (1)"], label_visibility="collapsed")
+        pilihan = st.selectbox(feature, ["Regular (0)", "Irregular (1)"], label_visibility="collapsed", key=feature)
         user_input[feature] = 1.0 if "Irregular" in pilihan else 0.0
 
     else:
-        val = st.text_input(feature, "", label_visibility="collapsed")
+        val = st.text_input(feature, "", label_visibility="collapsed", key=feature)
         try:
             val = val.replace(",", ".")
             user_input[feature] = float(val) if val.strip() != "" else 0.0
@@ -49,15 +53,31 @@ for feature in selected_features:
             st.error(f"Input {feature} harus berupa angka!")
             user_input[feature] = 0.0
 
-# === Konversi ke DataFrame sesuai urutan fitur ===
+# === Konversi ke DataFrame ===
 input_df = pd.DataFrame([user_input], columns=selected_features)
 
-# === Prediksi saat tombol ditekan ===
-if st.button("Prediksi"):
-    prediction = model.predict(input_df)[0]
-    probabilities = model.predict_proba(input_df)[0]  # [prob_tidak_PCOS, prob_PCOS]
+# === Tombol prediksi ===
+col1, col2, col3 = st.columns([1, 1, 2])
 
-    # === Tampilkan data yang diuji ===
+with col1:
+    pred_btn = st.button("🔍 Prediksi")
+with col2:
+    reset_btn = st.button("🔁 Reset Form Input")
+with col3:
+    history_btn = st.button("📊 Lihat Riwayat Prediksi (jika ada)")
+
+# === Fitur reset form ===
+if reset_btn:
+    for feature in selected_features:
+        if feature in st.session_state:
+            del st.session_state[feature]
+    st.rerun()
+
+# === Jika tombol prediksi ditekan ===
+if pred_btn:
+    prediction = model.predict(input_df)[0]
+    probabilities = model.predict_proba(input_df)[0]
+
     st.subheader("📋 Data yang Diuji")
 
     satuan_map = {
@@ -80,27 +100,30 @@ if st.button("Prediksi"):
     # === Hasil prediksi ===
     if prediction == 1:
         st.warning(f"⚠️ Hasil Prediksi: **PCOS** dengan probabilitas {probabilities[1]:.2%}")
-        st.write(
-            """
-            🧾 **Rekomendasi Sistem (Rule-based Expert System):**  
-            Sistem ini menyarankan Anda untuk melakukan **konsultasi lebih lanjut ke dokter spesialis kandungan** untuk pemeriksaan lanjutan.  
-
-            ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
-            """
+        rekomendasi = (
+            "Sistem menyarankan untuk melakukan **konsultasi ke dokter spesialis kandungan** "
+            "untuk pemeriksaan lebih lanjut."
         )
     else:
         st.success(f"💡 Hasil Prediksi: **Tidak PCOS** dengan probabilitas {probabilities[0]:.2%}")
-        st.write(
-            """
-            🧾 **Rekomendasi Sistem (Rule-based Expert System):**  
-            Tetap jaga pola hidup sehat, lakukan pemeriksaan rutin, dan segera konsultasi ke dokter apabila muncul keluhan lain.  
-
-            ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
-            """
+        rekomendasi = (
+            "Tetap jaga pola hidup sehat dan lakukan pemeriksaan rutin. "
+            "Segera konsultasi ke dokter bila muncul keluhan lain."
         )
 
-    # === Tambah grafik probabilitas ===
-    st.subheader("📊Visualisasi Probabilitas")
+    st.info(f"🧾 **Rekomendasi Sistem:** {rekomendasi}")
+    st.caption("⚠️ *Catatan: Sistem ini hanya berfungsi sebagai alat bantu prediksi, bukan diagnosis medis.*")
+
+    # === Simpan ke riwayat ===
+    st.session_state.history.append({
+        "Prediksi": "PCOS" if prediction == 1 else "Tidak PCOS",
+        "Probabilitas_PCOS": f"{probabilities[1]:.2%}",
+        "Probabilitas_Tidak_PCOS": f"{probabilities[0]:.2%}",
+        **user_input
+    })
+
+    # === Visualisasi probabilitas ===
+    st.subheader("📊 Visualisasi Probabilitas")
     fig, ax = plt.subplots()
     ax.bar(["Tidak PCOS", "PCOS"], probabilities, color=["skyblue", "salmon"])
     ax.set_ylabel("Probabilitas")
@@ -108,3 +131,12 @@ if st.button("Prediksi"):
     for i, v in enumerate(probabilities):
         ax.text(i, v + 0.02, f"{v:.2%}", ha="center", fontsize=10)
     st.pyplot(fig)
+
+# === Fitur lihat riwayat prediksi ===
+if history_btn:
+    if len(st.session_state.history) > 0:
+        st.subheader("📜 Riwayat Prediksi")
+        hist_df = pd.DataFrame(st.session_state.history)
+        st.dataframe(hist_df, use_container_width=True)
+    else:
+        st.info("Belum ada riwayat prediksi yang tersimpan.")
