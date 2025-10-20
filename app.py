@@ -58,28 +58,43 @@ if st.button("Prediksi"):
     prediction = model.predict(input_df)[0]
     probabilities = model.predict_proba(input_df)[0]  # [prob_tidak_PCOS, prob_PCOS]
 
+    # === Hasil Prediksi ===
     if prediction == 1:
         st.warning(f"⚠️ Hasil Prediksi: **PCOS** dengan probabilitas {probabilities[1]:.2%}")
-        st.write(
-            """
-            🧾 **Rekomendasi Sistem (Rule-based Expert System):**  
-            Sistem ini menyarankan Anda untuk melakukan **konsultasi lebih lanjut ke dokter spesialis kandungan** untuk pemeriksaan lanjutan.  
-
-            ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
-            """
-        )
     else:
         st.success(f"💡 Hasil Prediksi: **Tidak PCOS** dengan probabilitas {probabilities[0]:.2%}")
-        st.write(
-            """
-            🧾 **Rekomendasi Sistem (Rule-based Expert System):**  
-            Tetap jaga pola hidup sehat, lakukan pemeriksaan rutin, dan segera konsultasi ke dokter apabila muncul keluhan lain.  
 
-            ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
-            """
-        )
+    # === Tampilkan Data yang Diuji (Per Baris) ===
+    st.subheader("Data yang Diuji")
+    for feature, value in user_input.items():
+        st.write(f"- {feature}: **{value}**")
 
-    # === Tambah grafik probabilitas ===
+    # === Informasi Model ===
+    st.subheader("Informasi Model")
+    st.markdown("""
+    - Algoritma: **Random Forest**
+    - Oversampling: **SMOTE**
+    - Akurasi pada data uji: **91.74%**
+    - F1-Score: **0.89**
+    """)
+
+    # === Rekomendasi Sistem ===
+    st.subheader("Rekomendasi Sistem (Rule-based Expert System)")
+    if prediction == 1:
+        st.write("""
+        Sistem ini menyarankan Anda untuk melakukan **konsultasi lebih lanjut ke dokter spesialis kandungan** 
+        untuk pemeriksaan lanjutan.  
+        
+        ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
+        """)
+    else:
+        st.write("""
+        Tetap jaga pola hidup sehat, lakukan pemeriksaan rutin, dan segera konsultasi ke dokter apabila muncul keluhan lain.  
+        
+        ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
+        """)
+
+    # === Visualisasi Probabilitas ===
     st.subheader("Visualisasi Probabilitas")
     fig, ax = plt.subplots()
     ax.bar(["Tidak PCOS", "PCOS"], probabilities, color=["skyblue", "salmon"])
@@ -88,5 +103,3 @@ if st.button("Prediksi"):
     for i, v in enumerate(probabilities):
         ax.text(i, v + 0.02, f"{v:.2%}", ha="center", fontsize=10)
     st.pyplot(fig)
-
-
