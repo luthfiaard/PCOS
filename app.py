@@ -3,16 +3,14 @@ import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# === Load model + fitur ===
+# === Load model dan fitur ===
 bundle = joblib.load("final_model_with_features.sav")
-
 model = bundle["model"]
 selected_features = bundle["features"]
 
-st.title("Prediksi Penyakit PCOS dengan Random Forest")
-
-st.write("Masukkan data berikut untuk prediksi:"
-        "Jangan gunakan tanda koma(,) ganti dengan tanda titik (.)")
+st.title("🧬 Prediksi PCOS dengan Random Forest")
+st.write("Masukkan data berikut untuk melakukan prediksi:")
+st.write("Jangan gunakan tanda koma (,) ganti dengan tanda titik (.)")
 
 # === Mapping deskripsi dan contoh rentang input ===
 feature_info = {
@@ -21,25 +19,11 @@ feature_info = {
     "Skin darkening (Y/N)": {"desc": "Apakah terdapat penggelapan kulit", "range": "Pilih: Tidak (0) / Ya (1)"},
     "Weight gain(Y/N)": {"desc": "Apakah terjadi peningkatan berat badan", "range": "Pilih: Tidak (0) / Ya (1)"},
     "hair growth(Y/N)": {"desc": "Apakah terjadi pertumbuhan rambut berlebih", "range": "Pilih: Tidak (0) / Ya (1)"},
-    "Cycle(R/I)": {"desc": "Tipe siklus menstruasi", "range": "Pilih: Regular(Teratur) = 0 / Irregular(Tidak Teratur) = 1"},
+    "Cycle(R/I)": {"desc": "Tipe siklus menstruasi", "range": "Pilih: Regular (0) / Irregular (1)"},
     "AMH(ng/mL)": {"desc": "Masukkan nilai Anti-Müllerian Hormone", "range": "Contoh: 1 - 10"},
     "Cycle length(days)": {"desc": "Masukkan panjang siklus menstruasi dalam hari", "range": "Contoh: 21 - 35"},
     "FSH(mIU/mL)": {"desc": "Masukkan nilai Follicle-Stimulating Hormone", "range": "Contoh: 3 - 15"},
     "LH(mIU/mL)": {"desc": "Masukkan nilai Luteinizing Hormone", "range": "Contoh: 2 - 20"}
-}
-
-# === Mapping satuan untuk tampilan hasil ===
-feature_units = {
-    "Follicle No. (R)": "folikel",
-    "Follicle No. (L)": "folikel",
-    "Skin darkening (Y/N)": "(0=Tidak, 1=Ya)",
-    "Weight gain(Y/N)": "(0=Tidak, 1=Ya)",
-    "hair growth(Y/N)": "(0=Tidak, 1=Ya)",
-    "Cycle(R/I)": "(0=Regular, 1=Irregular)",
-    "AMH(ng/mL)": "ng/mL",
-    "Cycle length(days)": "hari",
-    "FSH(mIU/mL)": "mIU/mL",
-    "LH(mIU/mL)": "mIU/mL"
 }
 
 # === Form input untuk user ===
@@ -73,39 +57,50 @@ if st.button("Prediksi"):
     prediction = model.predict(input_df)[0]
     probabilities = model.predict_proba(input_df)[0]  # [prob_tidak_PCOS, prob_PCOS]
 
-    # === Hasil Prediksi ===
+    # === Tampilkan data yang diuji ===
+    st.subheader("📋 Data yang Diuji")
+
+    satuan_map = {
+        "Follicle No. (R)": "folikel",
+        "Follicle No. (L)": "folikel",
+        "AMH(ng/mL)": "ng/mL",
+        "Cycle length(days)": "hari",
+        "FSH(mIU/mL)": "mIU/mL",
+        "LH(mIU/mL)": "mIU/mL"
+    }
+
+    for feature, value in user_input.items():
+        if feature in ["Skin darkening (Y/N)", "Weight gain(Y/N)", "hair growth(Y/N)"]:
+            st.write(f"**{feature}:** {value} (0=Tidak, 1=Ya)")
+        elif feature == "Cycle(R/I)":
+            st.write(f"**{feature}:** {value} (0=Regular, 1=Irregular)")
+        else:
+            st.write(f"**{feature}:** {value} {satuan_map.get(feature, '')}")
+
+    # === Hasil prediksi ===
     if prediction == 1:
         st.warning(f"⚠️ Hasil Prediksi: **PCOS** dengan probabilitas {probabilities[1]:.2%}")
+        st.write(
+            """
+            🧾 **Rekomendasi Sistem (Rule-based Expert System):**  
+            Sistem ini menyarankan Anda untuk melakukan **konsultasi lebih lanjut ke dokter spesialis kandungan** untuk pemeriksaan lanjutan.  
+
+            ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
+            """
+        )
     else:
         st.success(f"💡 Hasil Prediksi: **Tidak PCOS** dengan probabilitas {probabilities[0]:.2%}")
+        st.write(
+            """
+            🧾 **Rekomendasi Sistem (Rule-based Expert System):**  
+            Tetap jaga pola hidup sehat, lakukan pemeriksaan rutin, dan segera konsultasi ke dokter apabila muncul keluhan lain.  
 
-    # === Data yang Diuji (dengan satuan) ===
-    st.subheader("Data yang Diuji")
-    for feature, value in user_input.items():
-        satuan = feature_units.get(feature, "")
-        if satuan:
-            st.write(f"- {feature}: **{value} {satuan}**")
-        else:
-            st.write(f"- {feature}: **{value}**")
+            ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
+            """
+        )
 
-    # === Rekomendasi Sistem ===
-    st.subheader("Rekomendasi Sistem (Rule-based Expert System)")
-    if prediction == 1:
-        st.write("""
-        Sistem ini menyarankan Anda untuk melakukan **konsultasi lebih lanjut ke dokter spesialis kandungan** 
-        untuk pemeriksaan lanjutan.  
-        
-        ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
-        """)
-    else:
-        st.write("""
-        Tetap jaga pola hidup sehat, lakukan pemeriksaan rutin, dan segera konsultasi ke dokter apabila muncul keluhan lain.  
-        
-        ⚠️ *Catatan:* Sistem ini hanya berfungsi sebagai **alat bantu prediksi**, bukan diagnosis medis.
-        """)
-
-    # === Visualisasi Probabilitas ===
-    st.subheader("Visualisasi Probabilitas")
+    # === Tambah grafik probabilitas ===
+    st.subheader("📊Visualisasi Probabilitas")
     fig, ax = plt.subplots()
     ax.bar(["Tidak PCOS", "PCOS"], probabilities, color=["skyblue", "salmon"])
     ax.set_ylabel("Probabilitas")
